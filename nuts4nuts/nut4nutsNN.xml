@@ -1,0 +1,70 @@
+<?xml version="1.0" ?>
+<PyBrain>
+	<Network class="pybrain.structure.networks.feedforward.FeedForwardNetwork" name="FeedForwardNetwork-21">
+		<name val="'FeedForwardNetwork-21'"/>
+		<Modules>
+			<LinearLayer class="pybrain.structure.modules.linearlayer.LinearLayer" inmodule="True" name="input">
+				<dim val="9"/>
+				<name val="'input'"/>
+			</LinearLayer>
+			<LinearLayer class="pybrain.structure.modules.linearlayer.LinearLayer" name="output" outmodule="True">
+				<dim val="1"/>
+				<name val="'output'"/>
+			</LinearLayer>
+			<LinearLayer class="pybrain.structure.modules.linearlayer.LinearLayer" name="h1">
+				<dim val="4"/>
+				<name val="'h1'"/>
+			</LinearLayer>
+			<LinearLayer class="pybrain.structure.modules.linearlayer.LinearLayer" name="h2">
+				<dim val="4"/>
+				<name val="'h2'"/>
+			</LinearLayer>
+			<LinearLayer class="pybrain.structure.modules.linearlayer.LinearLayer" name="hrho">
+				<dim val="1"/>
+				<name val="'hrho'"/>
+			</LinearLayer>
+			<SigmoidLayer class="pybrain.structure.modules.sigmoidlayer.SigmoidLayer" name="hsig">
+				<dim val="3"/>
+				<name val="'hsig'"/>
+			</SigmoidLayer>
+		</Modules>
+		<Connections>
+			<FullConnection class="pybrain.structure.connections.full.FullConnection" name="input-&gt;h1">
+				<inmod val="input"/>
+				<outmod val="h1"/>
+				<Parameters>[-0.74343082314568754, -1.5631133174420893, 0.29326777130653592, 1.2071620926552293, -1.6365314301927913, 0.41245306790212549, -0.40207368627189277, -1.9633230707349245, 1.2506004714700343, 1.0539545053719546, 1.8783179549972178, 0.539697526361817, 1.0618019604438753, -1.2119339514053946, 0.81052332402066452, 0.076022073368728599, 0.072372628640208686, 0.66798066027938174, -1.0330596964719236, -0.13940889149142671, 1.6478229671099429, 0.71779610959308726, 0.52112895200099008, 0.32089673073259112, 2.8349613832642651, 1.3464893808680305, 0.12982205037589181, -0.49988075396579928, 2.1944912264454421, -1.3103916863758689, -1.0860480251759332, 0.48411990616432138, -0.35066365507864811, -0.11037335458672458, -1.6985014594915449, 0.01556535034819821]</Parameters>
+			</FullConnection>
+			<FullConnection class="pybrain.structure.connections.full.FullConnection" name="input-&gt;h2">
+				<inmod val="input"/>
+				<outmod val="h2"/>
+				<Parameters>[-0.49451000103812065, -0.33462351359672154, -1.7099101937379211, -0.93765290551633296, -0.033696963927004976, 1.2697154666361954, 0.85753473109525247, 1.755248665913842, -2.2327166362867921, 0.43436528810293329, 0.73138713526736443, 0.97486163425380135, -1.5072777668878248, -0.70596471300528751, 0.44214227195737649, 2.0231567146770026, -0.50051355927468244, -0.4746426119215294, -0.70310752315705738, -1.4206058486202886, 0.84823680850445471, 0.034402741935882331, -0.11135242225807387, 2.762853153133765, -0.038089703120840951, -0.047787657751287425, 1.0633413835801111, -0.21544847873858469, 1.1706659961088002, -0.58691473178540854, 1.9437860829382116, 0.67570939523231965, 0.59542671303021222, -0.75883240679770136, 0.90475309267818271, 0.43521293197556138]</Parameters>
+			</FullConnection>
+			<FullConnection class="pybrain.structure.connections.full.FullConnection" name="input-&gt;hrho">
+				<inmod val="input"/>
+				<inSliceFrom val="8"/>
+				<outmod val="hrho"/>
+				<Parameters>[-0.51764118821023353]</Parameters>
+			</FullConnection>
+			<FullConnection class="pybrain.structure.connections.full.FullConnection" name="FullConnection-17">
+				<inmod val="h1"/>
+				<outmod val="hsig"/>
+				<Parameters>[0.058995657432624089, -0.032098517178699139, -0.17600484589705928, -0.33969076443817781, -1.5213847623425456, -0.024600746259202645, -0.97420338074391089, 0.17819747677972533, -0.34917365571927528, 0.87779988733678393, 0.59474748938494204, -1.7412832324717979]</Parameters>
+			</FullConnection>
+			<FullConnection class="pybrain.structure.connections.full.FullConnection" name="FullConnection-18">
+				<inmod val="h2"/>
+				<outmod val="hsig"/>
+				<Parameters>[-2.0487015605038263, -0.64937805063143794, 0.53467122610673012, 0.98700099108570538, -0.308804029696922, 0.21765088444615407, 2.1848158256461891, 0.16475553358190848, 0.29071176454915226, 0.5817946209460374, 0.24510580345005048, 1.92611388425457]</Parameters>
+			</FullConnection>
+			<FullConnection class="pybrain.structure.connections.full.FullConnection" name="FullConnection-19">
+				<inmod val="hrho"/>
+				<outmod val="hsig"/>
+				<Parameters>[0.55673484914834137, -1.4384146373324092, -1.1417856187650528]</Parameters>
+			</FullConnection>
+			<FullConnection class="pybrain.structure.connections.full.FullConnection" name="FullConnection-20">
+				<inmod val="hsig"/>
+				<outmod val="output"/>
+				<Parameters>[-0.87591391520416673, -0.068592496079999135, 0.97931808003854748]</Parameters>
+			</FullConnection>
+		</Connections>
+	</Network>
+</PyBrain>
