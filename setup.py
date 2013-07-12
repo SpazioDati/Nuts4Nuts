@@ -14,10 +14,15 @@ if sys.argv[-1] == "publish":
 
 required = [
     'requests==1.2.0',
-    'PyBrain==0.3.1',
-    'datatxt-querist==0.1'
-    'dbpedia-querist==0.1'
-    'dewiki==0.1.0'
+    'PyBrain==0.3',
+    'dewiki==0.1.0',
+    'datatxt_querist==0.1',
+    'dbpedia_querist==0.1',
+]
+dependency_links = [
+    'git+https://github.com/SpazioDati/dewiki.git#egg=dewiki-0.1.0',
+    'git+https://github.com/SpazioDati/DataTXT-querist.git#egg=datatxt_querist-0.1',
+    'git+https://github.com/SpazioDati/DBpedia-querist.git#egg=dbpedia_querist-0.1',
 ]
 
 setup(
@@ -29,6 +34,7 @@ setup(
     url='https://github.com/SpazioDati/Nuts4nuts',
     packages=['nuts4nuts'],
     install_requires=required,
+    dependency_links=dependency_links,
     license='MIT',
     classifiers=(
         'Development Status :: 3 - Alpha',
