@@ -131,11 +131,17 @@ class PlaceCandidate(object):
     def __init__(self, name, features):
         self.name = name
         self.features = features
-        self.__d = {'name': self.name,
-                    'features': self.features}
+        self.score = None
+        self.match = False
+
+    def set_score(self, score):
+        self.score = score
+
+    def set_match(self):
+        self.match = True
 
     def __getitem__(self, key):
-        return self.__d[key]
+        return getattr(self, key)
 
     def __repr__(self):
         return 'PlaceCandidate<(name={name}, features={features})>'.format(

@@ -187,6 +187,21 @@ class Nuts4Nuts(object):
 
         return candidates
 
+    def _calculate_score(self, nnres, result):
+        score = 0.0
+        if nnres <= 0.5:
+            if nnres <= 0.0:
+                score = 1.0
+            else:
+                score = 1.0-nnres/0.5
+        else:
+            if nnres <= 0.0:
+                score = 1.0
+            else:
+                score = nnres/0.5-1.0
+
+        return score
+
     def _select_couples(self, couples):
         logger.setLevel(logging.DEBUG)
         logger.debug('call _select_couples')
@@ -194,25 +209,32 @@ class Nuts4Nuts(object):
         winning_candidates = list()
         for c in couples:
             logger.debug('couple: {}'.format(c))
+            score = 0
 
             if c[0].name == c[1].name:
                 print 'same_city'
+                score = 1.0
                 if c[0].features.rho >= c[1].features.rho:
+                    c[0].set_score(score)
                     winning_candidates.append(c[0])
                 else:
+                    c[1].set_score(score)
                     winning_candidates.append(c[1])
 
             else:
                 nnres = self.activate(c[0], c[1])
                 result = self._decide(nnres)
+                score = self._calculate_score(nnres, result)
 
                 logger.debug('nnres: {nnres}, result: {result}'.format(nnres=nnres,
                                                                        result=result))
-
                 if result != 0.5:
                     result = int(result)
+                    c[result].set_score(score)
                     winning_candidates.append(c[result])
                 else:
+                    c[0].set_score(score)
+                    c[1].set_score(score)
                     winning_candidates.append(c[0])
                     winning_candidates.append(c[1])
 
@@ -223,11 +245,15 @@ class Nuts4Nuts(object):
 
         if len(winning_candidates) == 1:
             logger.setLevel(logging.INFO)
+            winning_candidates = [c.set_match() for c in winning_candidates]
             return winning_candidates
 
         elif len(winning_candidates) == 2:
-            nnres = self.activate(c[0], c[1])
+            nnres = self.activate(winning_candidates[0], winning_candidates[1])
             result = self._decide(nnres)
+
+            winning_candidates[0].set_score(score)
+            winning_candidates[1].set_score(score)
 
             logger.debug('nnres: {nnres}, result: {result}'.format(nnres=nnres,
                                                                    result=result))
@@ -235,7 +261,7 @@ class Nuts4Nuts(object):
             logger.setLevel(logging.INFO)
             if result != 0.5:
                 result = int(result)
-                return [winning_candidates[result]]
+                return [winning_candidates[result].set_match()]
             else:
                 return winning_candidates
         else:
