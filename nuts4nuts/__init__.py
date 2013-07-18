@@ -366,8 +366,8 @@ if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
 
     # --- variables ---
-    DATATXT_APP_ID = 'ac0d0af0'
-    DATATXT_APP_KEY = '27bc8c33b4af532704cd621c9f39f261'
+    DATATXT_APP_ID = 'YOUR_APP_ID'
+    DATATXT_APP_KEY = 'YOUR_KEY_ID'
 
     # --- main ---
     print
