@@ -107,7 +107,7 @@ class FeatureExtractor(object):
         self._set_feats()
 
     def _set_feats(self):
-        for type_ in self.place['types']:
+        for type_, id_ in self.place['types']:
             if type_ in PARENTTYPES:
                 self.features.hasParentType = True
 
@@ -130,15 +130,13 @@ class FeatureExtractor(object):
 
 class PlaceCandidate(object):
 
-    def __init__(self, name, features):
+    def __init__(self, name, id, type, features):
         self.name = name
+        self.id = id
+        self.type = type
         self.features = features
         self.score = 0.0
         self.match = False
-
-    @property
-    def id(self):
-        return self.name
 
     def set_match(self):
         self.match = True
@@ -147,8 +145,11 @@ class PlaceCandidate(object):
         return getattr(self, key)
 
     def __repr__(self):
-        return 'PlaceCandidate<(name={name}, score={score}, features={features})>'.format(
-               name=repr(self.name), score=repr(self.score), features=repr(self.features))
+        return 'PlaceCandidate<(name={name}, score={score}, type={type}, features={features})>'.format(
+               name=repr(self.name),
+               score=repr(self.score),
+               type=repr(self.type),
+               features=repr(self.features))
 
 
 class PlacesGetter():
@@ -178,13 +179,13 @@ class PlacesGetter():
         except:
             pass
 
-        logger.debug('annotations: {an}'.format(an=annotations))
         for an in annotations:
             isPlace = False
             for t in an['type']:
                 if t in PLACETYPES:
                     isPlace = True
             if isPlace:
+                # logger.debug('annotation: {an}'.format(an=an))
                 self.features.append({'name': an['title'],
                                       'rho': an['rho']
                                       })
@@ -199,13 +200,19 @@ class PlacesGetter():
 
             for r in reconres:
                 place['fathers'].append(r['name'].split('->')[0])
-                place['types'].append(r['type'][0]['id'])
+
+                # logger.debug('place: name={name}, r={r}'.format(name=place['name'], r=r))
+                place['types'].append((r['type'][0]['id'], r['id']))
 
             placenamematch = PARENTHESIS.search(place['name'])
             if placenamematch:
                 place['name'] = PARENTHESIS.sub('', place['name']).strip()
 
-            if set(place['types']).intersection(ALLOWEDTYPES):
+            logger.debug('place: name={name}, types={types}'.format(
+                         name=place['name'],
+                         types=place['types']))
+
+            if set(lau for lau, id_ in place['types']).intersection(ALLOWEDTYPES):
                 self.finalplaces.append(place)
 
         return self.finalplaces
@@ -223,8 +230,25 @@ class PlacesGetter():
             otherplaces.remove(place)
             fe = FeatureExtractor(place, otherplaces)
 
-            candidate = PlaceCandidate(place['name'], fe.features)
+            types = set(type_ for type_, id_ in place['types'])
+            if '/LAU2' in types:
+                place_type = '/LAU2'
+                place_id = [id_ for type_, id_ in place['types'] if type_ == '/LAU2'][0]
+            else:
+                place_type = '/LAU3'
+                place_id = [id_ for type_, id_ in place['types'] if type_ == '/LAU3'][0]
 
+            logger.debug('place: name={name}, types={types}, id={id}'.format(
+                         name=place['name'],
+                         types=place_type,
+                         id=place_id))
+
+            candidate = PlaceCandidate(name=place['name'],
+                                       id=place_id,
+                                       type=place_type,
+                                       features=fe.features)
+
+            logger.debug(candidate)
             self.candidates.append(candidate)
 
         return self.candidates
