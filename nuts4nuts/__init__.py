@@ -339,7 +339,7 @@ class Nuts4Nuts(object):
 
     def load(self, filename='nut4nutsNN.xml'):
         logger.info('Loading NN from file: {filename}'.format(filename=filename))
-        self.net = NetworkReader.readFrom('nut4nutsNN.xml')
+        self.net = NetworkReader.readFrom(filename)
 
 
 if __name__ == "__main__":
