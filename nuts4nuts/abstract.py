@@ -49,8 +49,11 @@ class AbstractGetter(object):
                                  page=self.page))
 
             if self.abstract is None:
-                wikitext = wtp.get_wikitext_from_api(self.page,
-                                                     lang=self.lang)
+                try:
+                    wikitext = wtp.get_wikitext_from_api(self.page,
+                                                         lang=self.lang)
+                except ValueError:
+                    wikitext = ''
 
                 match = SECTIONREGEX.search(wikitext)
 
@@ -58,9 +61,6 @@ class AbstractGetter(object):
                     start = match.start()
                     wikitext = wikitext[:start]
                 self.abstract = dewiki.from_string(wikitext).strip()
-
-            # sentences = nltk.tokenize.sent_tokenize(ex['text'])
-            # print len(sentences)
 
             return self.abstract
 

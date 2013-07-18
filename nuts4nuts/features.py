@@ -169,7 +169,11 @@ class PlacesGetter():
 
     def extract_types(self):
         self.features = list()
-        annotations = self.queryres['annotations']
+        annotations = list()
+        try:
+            annotations = self.queryres['annotations']
+        except:
+            pass
         for an in annotations:
             isPlace = False
             for t in an['type']:

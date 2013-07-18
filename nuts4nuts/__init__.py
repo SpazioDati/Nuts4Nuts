@@ -212,7 +212,6 @@ class Nuts4Nuts(object):
             score = 0
 
             if c[0].name == c[1].name:
-                print 'same_city'
                 score = 1.0
                 if c[0].features.rho >= c[1].features.rho:
                     c[0].set_score(score)
@@ -445,16 +444,18 @@ if __name__ == "__main__":
 
     n4n3.load()
 
-    print "Find the find the municipality for: 'Chiesa di San Terenzio'"
+    print "Find the municipality for: 'Chiesa di San Terenzio'"
     print n4n1.find_municipality('Chiesa_di_San_Terenzio')
     print
-    print "Find the find the municipality for: 'Grattacielo Pirelli'"
+    print "Find the municipality for: 'Grattacielo Pirelli'"
     print n4n1.find_municipality('Grattacielo_Pirelli')
     print
-    print "Find the find the municipality for: 'Parco Sempione (Milano)'"
+    print "Find the municipality for: 'Parco Sempione (Milano)'"
     print n4n1.find_municipality("Parco Sempione (Milano)")
     print
-    exit(0)
+    print "Find the municipality for: 'asfjviolvj' (non existing page)"
+    print n4n1.find_municipality("asfjviolvj")
+    print
 
     print
     print '== TEST 4 =='
