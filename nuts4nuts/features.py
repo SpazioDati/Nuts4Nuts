@@ -6,8 +6,8 @@ import urllib
 import requests
 import re
 import codecs
-
-from pprint import pprint
+import logging
+# from pprint import pprint
 
 # globals
 PLACETYPES = set([u'http://dbpedia.org/ontology/PopulatedPlace',
@@ -27,8 +27,10 @@ PARENTHESIS = re.compile('\(.*\)')
 
 SAMPLE_LENGHT = 9
 
+# --- logging
+logger = logging.getLogger('nuts4nuts.features')
 
-# NUTS recon
+
 class NutsRecon():
     '''
     Query the NUTS reconciliation service:
@@ -131,15 +133,12 @@ class PlaceCandidate(object):
     def __init__(self, name, features):
         self.name = name
         self.features = features
-        self.score = None
+        self.score = 0.0
         self.match = False
 
     @property
     def id(self):
         return self.name
-
-    def set_score(self, score):
-        self.score = score
 
     def set_match(self):
         self.match = True
@@ -148,8 +147,8 @@ class PlaceCandidate(object):
         return getattr(self, key)
 
     def __repr__(self):
-        return 'PlaceCandidate<(name={name}, features={features})>'.format(
-               name=repr(self.name), features=repr(self.features))
+        return 'PlaceCandidate<(name={name}, score={score}, features={features})>'.format(
+               name=repr(self.name), score=repr(self.score), features=repr(self.features))
 
 
 class PlacesGetter():
@@ -178,6 +177,8 @@ class PlacesGetter():
             annotations = self.queryres['annotations']
         except:
             pass
+
+        logger.debug('annotations: {an}'.format(an=annotations))
         for an in annotations:
             isPlace = False
             for t in an['type']:

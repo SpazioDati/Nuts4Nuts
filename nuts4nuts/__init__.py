@@ -5,6 +5,8 @@ nut4nuts
 """
 
 import logging
+from itertools import combinations
+from collections import defaultdict
 from datatxt_querist import DataTXTQuerist
 from pybrain.datasets import SupervisedDataSet
 from pybrain.supervised.trainers import BackpropTrainer
@@ -166,11 +168,9 @@ class Nuts4Nuts(object):
     def _decide(self, nnres):
         result = None
         if nnres < self.LOWER_THRESHOLD:
-            result = 0.0
+            result = 0
         elif nnres > self.UPPER_THRESHOLD:
-            result = 1.0
-        else:
-            result = 0.5
+            result = 1
 
         return result
 
@@ -204,78 +204,23 @@ class Nuts4Nuts(object):
 
         return score
 
-    def _select_couples(self, couples):
+    def _select_couples(self, candidates):
         logger.setLevel(logging.DEBUG)
         logger.debug('call _select_couples')
 
-        winning_candidates = list()
-        for c in couples:
-            logger.debug('couple: {}'.format(c))
-            score = 0
-
-            if c[0].name == c[1].name:
-                score = 1.0
-                if c[0].features.rho >= c[1].features.rho:
-                    c[0].set_score(score)
-                    winning_candidates.append(c[0])
-                else:
-                    c[1].set_score(score)
-                    winning_candidates.append(c[1])
-
-            else:
-                nnres = self.activate(c[0], c[1])
-                result = self._decide(nnres)
-                score = self._calculate_score(nnres, result)
-
-                logger.debug('nnres: {nnres}, result: {result}'.format(nnres=nnres,
-                                                                       result=result))
-                if result != 0.5:
-                    result = int(result)
-                    c[result].set_score(score)
-                    c[result].set_match()
-                    winning_candidates.append(c[result])
-                else:
-                    c[0].set_score(score)
-                    c[1].set_score(score)
-                    winning_candidates.append(c[0])
-                    winning_candidates.append(c[1])
-
-        winning_candidates = self._dedup_candidates(winning_candidates)
-
-        logger.debug('winning_candidates: {}'.format(winning_candidates))
-        logger.debug('(deduped) winning_candidates: {}'.format(winning_candidates))
-
-        if len(winning_candidates) == 1:
-            winning_candidates[0].set_match()
-            winning_candidates = [winning_candidates[0]]
-            return winning_candidates
-
-        elif len(winning_candidates) == 2:
-            nnres = self.activate(winning_candidates[0], winning_candidates[1])
+        winning_candidates = defaultdict(int)
+        for c in combinations(candidates, 2):
+            nnres = self.activate(c[0], c[1])
             result = self._decide(nnres)
+            if result:
+                winning_candidates[c[result]] += 1
 
-            winning_candidates[0].set_score(score)
-            winning_candidates[1].set_score(score)
+        for cand in candidates:
+            cand.score = winning_candidates[cand]/float(len(candidates))
 
-            logger.debug('nnres: {nnres}, result: {result}'.format(nnres=nnres,
-                                                                   result=result))
+        max_score = max(cand.score for cand in candidates)
 
-            logger.setLevel(logging.INFO)
-            if result != 0.5:
-                result = int(result)
-                return [winning_candidates[result].set_match()]
-            else:
-                return winning_candidates
-        else:
-            winning_couples = [(winning_candidates[i], winning_candidates[i+1])
-                               for i in range(0, len(winning_candidates)-1, 2)]
-
-            if (len(winning_candidates) % 2) != 0:
-                winning_couples = winning_couples + [(winning_candidates[-2], winning_candidates[-1])]
-
-            logger.debug('winning couples: %s' % winning_couples)
-
-            return self._select_couples(winning_couples)
+        return [c for c in candidates if c.score >= max_score]
 
     def from_candidates(self, candidates):
         logger.debug('candidates: %s' % candidates)
@@ -292,17 +237,10 @@ class Nuts4Nuts(object):
 
         if len(candidates) == 1:
             candidates[0].set_match()
+            candidates[0].score = 1.0
             return [candidates[0]]
 
-        couples = [(candidates[i], candidates[i+1])
-                   for i in range(0, len(candidates)-1, 2)]
-
-        if (len(candidates) % 2) != 0:
-            couples = couples + [(candidates[-2], candidates[-1])]
-
-        logger.debug('couples: %s' % couples)
-
-        return self._select_couples(couples)
+        return self._select_couples(candidates)
 
     def find_municipality(self, page):
         logger.setLevel(logging.INFO)
@@ -368,8 +306,8 @@ if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
 
     # --- variables ---
-    DATATXT_APP_ID = 'YOUR_APP_ID'
-    DATATXT_APP_KEY = 'YOUR_KEY_ID'
+    DATATXT_APP_ID = 'ac0d0af0'
+    DATATXT_APP_KEY = '27bc8c33b4af532704cd621c9f39f261'
 
     # --- main ---
     print
@@ -391,6 +329,9 @@ if __name__ == "__main__":
     print
     print "Find the municipality for: 'asfjviolvj' (non-existing page)"
     print n4n.find_municipality("asfjviolvj")
+    print
+    print "Find the municipality for: 'Santuario_di_Pietralba'"
+    print n4n.find_municipality("Santuario_di_Pietralba")
     print
 
     exit(0)

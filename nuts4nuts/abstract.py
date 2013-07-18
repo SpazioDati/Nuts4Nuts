@@ -17,7 +17,7 @@ QUERYBASE = u'<{page}> <http://dbpedia.org/ontology/abstract> ?o'
 SECTIONREGEX = re.compile('==[^=]*==', re.IGNORECASE)
 
 
-# --- logging logger
+# --- logging
 logger = logging.getLogger('nuts4nuts.abstract')
 
 
