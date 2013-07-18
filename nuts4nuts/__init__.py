@@ -189,6 +189,8 @@ class Nuts4Nuts(object):
 
     def _calculate_score(self, nnres, result):
         score = 0.0
+        assert len(nnres) == 1
+        nnres = nnres[0]
         if nnres <= 0.5:
             if nnres <= 0.0:
                 score = 1.0
