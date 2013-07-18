@@ -134,6 +134,10 @@ class PlaceCandidate(object):
         self.score = None
         self.match = False
 
+    @property
+    def id(self):
+        return self.name
+
     def set_score(self, score):
         self.score = score
 

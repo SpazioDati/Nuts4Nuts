@@ -230,6 +230,7 @@ class Nuts4Nuts(object):
                 if result != 0.5:
                     result = int(result)
                     c[result].set_score(score)
+                    c[result].set_match()
                     winning_candidates.append(c[result])
                 else:
                     c[0].set_score(score)
@@ -243,8 +244,8 @@ class Nuts4Nuts(object):
         logger.debug('(deduped) winning_candidates: {}'.format(winning_candidates))
 
         if len(winning_candidates) == 1:
-            logger.setLevel(logging.INFO)
-            winning_candidates = [c.set_match() for c in winning_candidates]
+            winning_candidates[0].set_match()
+            winning_candidates = [winning_candidates[0]]
             return winning_candidates
 
         elif len(winning_candidates) == 2:
@@ -288,6 +289,7 @@ class Nuts4Nuts(object):
             return []
 
         if len(candidates) == 1:
+            candidates[0].set_match()
             return [candidates[0]]
 
         couples = [(candidates[i], candidates[i+1])
@@ -332,11 +334,11 @@ class Nuts4Nuts(object):
                     print conn.whichBuffers(cc), conn.params[cc]
 
     def save(self, filename='nut4nutsNN.xml'):
-        logger.info('Writing NN to file: {filename}').format(filename=filename)
+        logger.info('Writing NN to file: {filename}'.format(filename=filename))
         NetworkWriter.writeToFile(self.net, filename)
 
     def load(self, filename='nut4nutsNN.xml'):
-        logger.info('Loading NN from file: {filename}').format(filename=filename)
+        logger.info('Loading NN from file: {filename}'.format(filename=filename))
         self.net = NetworkReader.readFrom('nut4nutsNN.xml')
 
 
@@ -364,111 +366,29 @@ if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
 
     # --- variables ---
-    DATATXT_APP_ID = 'YOUR_APP_ID'
-    DATATXT_APP_KEY = 'YOUR_APP_KEY'
+    DATATXT_APP_ID = 'ac0d0af0'
+    DATATXT_APP_KEY = '27bc8c33b4af532704cd621c9f39f261'
 
     # --- main ---
-
-    # ### TEST 1 ###
-    TRAININGCYCLES = 200
-    print
     print
     print '== TEST 1 =='
-    print 'Trains network and test it again a test set'
-    print
 
-    n4n1 = Nuts4Nuts(datatxt_app_id=DATATXT_APP_ID,
-                     datatxt_app_key=DATATXT_APP_KEY)
+    n4n = Nuts4Nuts(datatxt_app_id=DATATXT_APP_ID,
+                    datatxt_app_key=DATATXT_APP_KEY)
 
-    infile = open(INFILE, 'r')
-    lines = [line.strip() for line in infile.readlines()]
-
-    print 'Adding training samples'
-    for line in lines:
-        data = read_line(line)
-        # print_data(data)
-
-        sample = data['sample']
-        target = data['target']
-        n4n1.add_sample(sample, target)
-
-    infile.close()
-
-    print 'Training neural network'
-    n4n1.train(TRAININGCYCLES)
-
-    infile = open(INFILETEST, 'r')
-    lines = [line.strip() for line in infile.readlines()]
-
-    correct = 0
-    error = 0
-    undecided = 0
-    for line in lines:
-        data = read_line(line)
-        sample = data['sample']
-        target = data['target']
-
-        nnres = n4n1.activate_from_sample(sample)
-        result = n4n1._decide(nnres)
-
-        if result == target:
-            correct += 1
-            logger.debug('Match: nnres: {nnres}, res: {result}, tgt: {target}'.format(nnres=nnres,
-                                                                                      result=result,
-                                                                                      target=data['target']))
-        else:
-            if result == 0.5:
-                undecided += 1
-                logger.debug('Undecided: nnres: {nnres}, res: {result}, tgt: {target}'.format(nnres=nnres,
-                                                                                              result=result,
-                                                                                              target=data['target']))
-            else:
-                error += 1
-                logger.debug('Wrong: nnres: {nnres}, res: {result}, tgt: {target}'.format(nnres=nnres,
-                                                                                          result=result,
-                                                                                          target=data['target']))
-
-            logger.debug('data: {data}'.format(data=data))
-
-    print 'RESULTS:'
-    print 'Matches: %d' % correct
-    print 'Wrong: %d' % error
-    print 'Undecided: %d' % undecided
-    print
-
-    print
-    print '== TEST 2 =='
-
-    n4n3 = Nuts4Nuts(datatxt_app_id=DATATXT_APP_ID,
-                     datatxt_app_key=DATATXT_APP_KEY)
-
-    n4n3.load()
+    n4n.load()
 
     print "Find the municipality for: 'Chiesa di San Terenzio'"
-    print n4n1.find_municipality('Chiesa_di_San_Terenzio')
+    print n4n.find_municipality('Chiesa_di_San_Terenzio')
     print
     print "Find the municipality for: 'Grattacielo Pirelli'"
-    print n4n1.find_municipality('Grattacielo_Pirelli')
+    print n4n.find_municipality('Grattacielo_Pirelli')
     print
     print "Find the municipality for: 'Parco Sempione (Milano)'"
-    print n4n1.find_municipality("Parco Sempione (Milano)")
+    print n4n.find_municipality("Parco Sempione (Milano)")
     print
-    print "Find the municipality for: 'asfjviolvj' (non existing page)"
-    print n4n1.find_municipality("asfjviolvj")
+    print "Find the municipality for: 'asfjviolvj' (non-existing page)"
+    print n4n.find_municipality("asfjviolvj")
     print
-
-    print
-    print '== TEST 4 =='
-    print 'Save and load a network from a file'
-    print
-    print 'Saving Network to file'
-
-    n4n1.save()
-    print 'Saved network'
-    n4n4 = Nuts4Nuts(datatxt_app_id=DATATXT_APP_ID,
-                     datatxt_app_key=DATATXT_APP_KEY)
-
-    print 'Loading network'
-    n4n4.load()
 
     exit(0)
