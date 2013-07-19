@@ -130,11 +130,12 @@ class FeatureExtractor(object):
 
 class PlaceCandidate(object):
 
-    def __init__(self, name, id, type, features):
+    def __init__(self, name, id, type, fathers, features):
         self.name = name
         self.id = id
         self.type = type
         self.features = features
+        self.fathers = fathers
         self.score = 0.0
         self.match = False
 
@@ -244,9 +245,11 @@ class PlacesGetter():
                          types=place_type,
                          id=place_id))
 
+            logger.debug(place)
             candidate = PlaceCandidate(name=place['name'],
                                        id=place_id,
                                        type=place_type,
+                                       fathers=place['fathers'],
                                        features=fe.features)
 
             logger.debug(candidate)

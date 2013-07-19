@@ -212,9 +212,14 @@ class Nuts4Nuts(object):
         for c in combinations(candidates, 2):
             nnres = self.activate(c[0], c[1])
             result = self._decide(nnres)
-            if result:
+            logger.debug('couple: (cand0: {cand0}, cand1: {cand1}), nnres: {nnres}'.format(
+                         cand0=c[0],
+                         cand1=c[1],
+                         nnres=nnres))
+            if result is not None:
                 winning_candidates[c[result]] += 1
 
+        logger.debug(winning_candidates)
         for cand in candidates:
             cand.score = winning_candidates[cand]/float(len(candidates))
 
@@ -240,10 +245,33 @@ class Nuts4Nuts(object):
             candidates[0].score = 1.0
             return [candidates[0]]
 
+        lau2 = [c for c in candidates if c.type == '/LAU2']
+        lau3 = [c for c in candidates if c.type == '/LAU3']
+
+        # logger.debug(lau2)
+        # logger.debug(lau3)
+
+        winning_lau3s = list()
+
+        for cand in lau3:
+            lau3_fathers = [father for father in lau2 if father.name in cand.fathers]
+            if len(lau3_fathers) == 1:
+                winning_lau3s.append((cand, lau3_fathers[0]))
+
+        # logger.debug(winning_lau3s)
+        if len(winning_lau3s) == 1:
+            winning_lau3s[0][0].set_match()
+            winning_lau3s[0][0].score = 1.0
+            return [winning_lau3s[0][0]]
+        elif len(winning_lau3s) > 1:
+            if len(frozenset(father for lau3, father in winning_lau3s)) == 1:
+                winning_lau3s[0][1].set_match()
+                winning_lau3s[0][1].score = 1.0
+                return [winning_lau3s[0][1]]
+
         return self._select_couples(candidates)
 
     def find_municipality(self, page):
-        logger.setLevel(logging.INFO)
         ag = AbstractGetter(page)
         self.abstract = ag.get_abstract()
         querytext = self.dq.query(self.abstract)
@@ -336,5 +364,7 @@ if __name__ == "__main__":
     print "Find the municipality for: 'Monte Calisio'"
     print n4n.find_municipality("Monte Calisio")
     print
+    print "Find the municipality for: 'Abbazia_di_Santa_Croce_al_Chienti'"
+    print n4n.find_municipality("Abbazia_di_Santa_Croce_al_Chienti")
 
     exit(0)
