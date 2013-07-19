@@ -145,9 +145,10 @@ class PlaceCandidate(object):
         return getattr(self, key)
 
     def __repr__(self):
-        return 'PlaceCandidate<(name={name}, score={score}, type={type}, features={features})>'.format(
+        return 'PlaceCandidate<(name={name}, score={score}, match={match}, type={type}, features={features})>'.format(
                name=repr(self.name),
                score=repr(self.score),
+               match=repr(self.match),
                type=repr(self.type),
                features=repr(self.features))
 

@@ -232,7 +232,7 @@ class Nuts4Nuts(object):
         logger.debug('(deduped) len(candidates): %s' % len(candidates))
 
         if len(candidates) == 0:
-            logger.warning('No candidates found')
+            logger.debug('No candidates found')
             return []
 
         if len(candidates) == 1:
@@ -332,6 +332,9 @@ if __name__ == "__main__":
     print
     print "Find the municipality for: 'Santuario_di_Pietralba'"
     print n4n.find_municipality("Santuario_di_Pietralba")
+    print
+    print "Find the municipality for: 'Monte Calisio'"
+    print n4n.find_municipality("Monte Calisio")
     print
 
     exit(0)
