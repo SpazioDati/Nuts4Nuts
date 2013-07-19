@@ -225,7 +225,12 @@ class Nuts4Nuts(object):
 
         max_score = max(cand.score for cand in candidates)
 
-        return [c for c in candidates if c.score >= max_score]
+        selected_places = [c for c in candidates if c.score >= max_score]
+
+        if len(selected_places) == 1:
+            selected_places[0].set_match()
+
+        return selected_places
 
     def from_candidates(self, candidates):
         logger.debug('candidates: %s' % candidates)
