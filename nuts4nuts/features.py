@@ -11,8 +11,8 @@ import logging
 
 # globals
 PLACETYPES = set([u'http://dbpedia.org/ontology/PopulatedPlace',
-                  u'http://dbpedia.org/ontology/Place',
-                  u'http://schema.org/Place'
+                  u'http://dbpedia.org/ontology/Settlement',
+                  u'http://dbpedia.org/ontology/City'
                   ])
 
 PARENTTYPES = set([u'/NUTS3',
@@ -186,6 +186,7 @@ class PlacesGetter():
             for t in an['type']:
                 if t in PLACETYPES:
                     isPlace = True
+                    break
             if isPlace:
                 # logger.debug('annotation: {an}'.format(an=an))
                 self.features.append({'name': an['title'],
