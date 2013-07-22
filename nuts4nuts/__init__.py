@@ -181,28 +181,12 @@ class Nuts4Nuts(object):
             if len(dups) > 1:
                 max_feat = max([c[1].features.rho for c in dups])
                 dedups = [c for c in dups if c[1].features.rho == max_feat][0]
+                dups.reverse()
                 for d in dups:
                     if d[0] != dedups[0]:
                         del candidates[d[0]]
 
         return candidates
-
-    def _calculate_score(self, nnres, result):
-        score = 0.0
-        assert len(nnres) == 1
-        nnres = nnres[0]
-        if nnres <= 0.5:
-            if nnres <= 0.0:
-                score = 1.0
-            else:
-                score = 1.0-nnres/0.5
-        else:
-            if nnres <= 0.0:
-                score = 1.0
-            else:
-                score = nnres/0.5-1.0
-
-        return score
 
     def _select_couples(self, candidates):
         logger.setLevel(logging.DEBUG)
@@ -371,5 +355,8 @@ if __name__ == "__main__":
     print
     print "Find the municipality for: 'Abbazia_di_Santa_Croce_al_Chienti'"
     print n4n.find_municipality("Abbazia_di_Santa_Croce_al_Chienti")
+    print
+    print "Find the municipality for: 'Palazzo Vecchio'"
+    print n4n.find_municipality("Palazzo Vecchio")
 
     exit(0)
