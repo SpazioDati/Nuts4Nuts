@@ -1,13 +1,14 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import json
 import urllib
-import requests
 import re
 import codecs
 import logging
 # from pprint import pprint
+
+from places import PlaceCandidate, ALLOWEDTYPES
+from nuts import NutsRecon
 
 # globals
 PLACETYPES = set([u'http://dbpedia.org/ontology/PopulatedPlace',
@@ -21,30 +22,12 @@ PARENTTYPES = set([u'/NUTS3',
                    u'/NUTS0'
                    ])
 
-ALLOWEDTYPES = set([u'/LAU2', u'/LAU3'])
-
 PARENTHESIS = re.compile('\(.*\)')
 
 SAMPLE_LENGHT = 9
 
 # --- logging
 logger = logging.getLogger('nuts4nuts.features')
-
-
-class NutsRecon():
-    '''
-    Query the NUTS reconciliation service:
-        http://nuts.spaziodati.eu/
-    '''
-
-    def __init__(self):
-        self.RECONCILE_URL = 'http://nuts.spaziodati.eu/reconcile'
-        self.SUGGEST_URL = 'http://nuts.spaziodati.eu/suggest'
-
-    def query(self, query):
-        request = json.dumps({
-            'q0': {'query': query}})
-        return requests.get(self.RECONCILE_URL, params={'queries': request}).json()['q0']['result']
 
 
 # features
@@ -126,32 +109,6 @@ class FeatureExtractor(object):
 
     def dump_features(self):
         return self.features.dump_features()
-
-
-class PlaceCandidate(object):
-
-    def __init__(self, name, id, type, fathers, features):
-        self.name = name
-        self.id = id
-        self.type = type
-        self.features = features
-        self.fathers = fathers
-        self.score = 0.0
-        self.match = False
-
-    def set_match(self):
-        self.match = True
-
-    def __getitem__(self, key):
-        return getattr(self, key)
-
-    def __repr__(self):
-        return 'PlaceCandidate<(name={name}, score={score}, match={match}, type={type}, features={features})>'.format(
-               name=repr(self.name),
-               score=repr(self.score),
-               match=repr(self.match),
-               type=repr(self.type),
-               features=repr(self.features))
 
 
 class PlacesGetter():
@@ -294,6 +251,7 @@ class PlacesGetter():
                 continue
             outfile.write(','.join(printlist)+'\n')
             print ','.join(printlist)
+
 
 if __name__ == "__main__":
     from datasets.testset import TEST
