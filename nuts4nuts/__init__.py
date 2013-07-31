@@ -320,8 +320,9 @@ class Nuts4Nuts(object):
             logger.debug(candidates_from_templates)
             logger.debug(candidates_from_nn)
             if candidates_from_templates and candidates_from_nn:
-                total_candidates = self._lau3_from_lau2(
-                    candidates_from_nn + candidates_from_templates)
+                merge_candidates = candidates_from_nn + candidates_from_templates
+                total_candidates = self._lau3_from_lau2(merge_candidates) or \
+                    merge_candidates
                 if len(total_candidates) == 1:
                     total_candidates[0].set_match()
                 return total_candidates
@@ -457,6 +458,11 @@ if __name__ == "__main__":
     print
     print "Find the municipality for: 'Castel_San_Felice_(Sant'Anatolia_di_Narco)'"
     print n4n.find_municipality("Castel_San_Felice_(Sant'Anatolia_di_Narco)")
+    print '----------'
+    print
+    print
+    print "Find the municipality for: 'Bianco_(Italia)'"
+    print n4n.find_municipality("Bianco_(Italia)")
     print '----------'
     print
 
