@@ -290,6 +290,8 @@ class Nuts4Nuts(object):
         common_candidates = set([c.name for c in candidates_from_templates]).intersection(
                                  set([c.name for c in candidates_for_nn])
                                  )
+
+        logger.debug(common_candidates)
         if common_candidates:
             result = [c
                       for c in candidates_from_templates
@@ -315,9 +317,13 @@ class Nuts4Nuts(object):
             candidates_from_templates = self._lau3_from_lau2(candidates_from_templates) or \
                                         candidates_from_templates
 
+            logger.debug(candidates_from_templates)
+            logger.debug(candidates_from_nn)
             if candidates_from_templates and candidates_from_nn:
                 total_candidates = self._lau3_from_lau2(
                     candidates_from_nn + candidates_from_templates)
+                if len(total_candidates) == 1:
+                    total_candidates[0].set_match()
                 return total_candidates
             else:
                 if candidates_from_templates:
@@ -448,6 +454,10 @@ if __name__ == "__main__":
     print n4n.find_municipality("Museo del Risorgimento (Castelfidardo)")
     print '----------'
     print
-
+    print
+    print "Find the municipality for: 'Castel_San_Felice_(Sant'Anatolia_di_Narco)'"
+    print n4n.find_municipality("Castel_San_Felice_(Sant'Anatolia_di_Narco)")
+    print '----------'
+    print
 
     exit(0)
