@@ -406,45 +406,45 @@ if __name__ == "__main__":
 
     n4n.load()
 
-    # print "Find the municipality for: 'Chiesa di San Terenzio'"
-    # print n4n.find_municipality('Chiesa_di_San_Terenzio')
-    # print '----------'
-    # print
-    # print
-    # print "Find the municipality for: 'Grattacielo Pirelli'"
-    # print n4n.find_municipality('Grattacielo_Pirelli')
-    # print '----------'
-    # print
-    # print
-    # print "Find the municipality for: 'Parco Sempione (Milano)'"
-    # print n4n.find_municipality("Parco Sempione (Milano)")
-    # print '----------'
-    # print
-    # print
-    # print "Find the municipality for: 'asfjviolvj' (non-existing page)"
-    # print n4n.find_municipality("asfjviolvj")
-    # print '----------'
-    # print
-    # print
-    # print "Find the municipality for: 'Santuario_di_Pietralba'"
-    # print n4n.find_municipality("Santuario_di_Pietralba")
-    # print '----------'
-    # print
-    # print
-    # print "Find the municipality for: 'Monte Calisio'"
-    # print n4n.find_municipality("Monte Calisio")
-    # print '----------'
-    # print
-    # print
-    # print "Find the municipality for: 'Abbazia_di_Santa_Croce_al_Chienti'"
-    # print n4n.find_municipality("Abbazia_di_Santa_Croce_al_Chienti")
-    # print '----------'
-    # print
-    # print
-    # print "Find the municipality for: 'Palazzo Vecchio'"
-    # print n4n.find_municipality("Palazzo Vecchio")
-    # print '----------'
-    # print
+    print "Find the municipality for: 'Chiesa di San Terenzio'"
+    print n4n.find_municipality('Chiesa_di_San_Terenzio')
+    print '----------'
+    print
+    print
+    print "Find the municipality for: 'Grattacielo Pirelli'"
+    print n4n.find_municipality('Grattacielo_Pirelli')
+    print '----------'
+    print
+    print
+    print "Find the municipality for: 'Parco Sempione (Milano)'"
+    print n4n.find_municipality("Parco Sempione (Milano)")
+    print '----------'
+    print
+    print
+    print "Find the municipality for: 'asfjviolvj' (non-existing page)"
+    print n4n.find_municipality("asfjviolvj")
+    print '----------'
+    print
+    print
+    print "Find the municipality for: 'Santuario_di_Pietralba'"
+    print n4n.find_municipality("Santuario_di_Pietralba")
+    print '----------'
+    print
+    print
+    print "Find the municipality for: 'Monte Calisio'"
+    print n4n.find_municipality("Monte Calisio")
+    print '----------'
+    print
+    print
+    print "Find the municipality for: 'Abbazia_di_Santa_Croce_al_Chienti'"
+    print n4n.find_municipality("Abbazia_di_Santa_Croce_al_Chienti")
+    print '----------'
+    print
+    print
+    print "Find the municipality for: 'Palazzo Vecchio'"
+    print n4n.find_municipality("Palazzo Vecchio")
+    print '----------'
+    print
     print
     print "Find the municipality for: 'Montonate'"
     print n4n.find_municipality("Montonate")

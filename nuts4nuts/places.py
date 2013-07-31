@@ -33,7 +33,7 @@ class PlaceCandidate(object):
     def set_id_from_candidates(self, place_candidates, place_type):
         logger.debug(place_candidates)
         logger.debug(place_type)
-        self.place_id = [id_ for type_, id_ in place_candidates if type_ == place_type][0]
+        self.id = [id_ for type_, id_ in place_candidates if type_ == place_type][0]
 
     def set_match(self):
         self.match = True
