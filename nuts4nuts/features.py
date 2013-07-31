@@ -7,7 +7,7 @@ import codecs
 import logging
 # from pprint import pprint
 
-from places import PlaceCandidate, ALLOWEDTYPES
+from places import PlaceCandidateWithFeatures, ALLOWEDTYPES
 from nuts import NutsRecon
 
 # globals
@@ -117,7 +117,12 @@ class PlacesGetter():
     '''
 
     def __init__(self, page, queryres):
-        self.page = codecs.encode(page, 'utf-8')
+        try:
+            page = page.encode('utf-8', 'ignore')
+        except:
+            page = urllib.quote(page)
+
+        self.page = codecs.encode(page, 'utf-8', 'ignore')
         self.cleanpage = urllib.unquote(self.page)
         self.queryres = queryres
         self.features = self.extract_types()
@@ -169,7 +174,7 @@ class PlacesGetter():
                 place['name'] = PARENTHESIS.sub('', place['name']).strip()
 
             logger.debug('place: name={name}, types={types}'.format(
-                         name=place['name'],
+                         name=place['name'].encode('utf-8'),
                          types=place['types']))
 
             if set(lau for lau, id_ in place['types']).intersection(ALLOWEDTYPES):
@@ -199,16 +204,16 @@ class PlacesGetter():
                 place_id = [id_ for type_, id_ in place['types'] if type_ == '/LAU3'][0]
 
             logger.debug('place: name={name}, types={types}, id={id}'.format(
-                         name=place['name'],
+                         name=place['name'].encode('utf-8'),
                          types=place_type,
                          id=place_id))
 
             logger.debug(place)
-            candidate = PlaceCandidate(name=place['name'],
-                                       id=place_id,
-                                       type=place_type,
-                                       fathers=place['fathers'],
-                                       features=fe.features)
+            candidate = PlaceCandidateWithFeatures(name=place['name'],
+                                                   id=place_id,
+                                                   type=place_type,
+                                                   fathers=place['fathers'],
+                                                   features=fe.features)
 
             logger.debug(candidate)
             self.candidates.append(candidate)

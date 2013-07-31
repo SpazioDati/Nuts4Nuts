@@ -20,6 +20,7 @@ from pybrain.tools.xml.networkreader import NetworkReader
 
 from abstract import AbstractGetter
 from features import PlacesGetter
+from template import TemplateAnalyzer
 
 # globals
 INFILE = '../training/samples_training.csv'
@@ -66,12 +67,17 @@ class Nuts4Nuts(object):
     W_IS_PARENT = 1
     W_HAS_LOCALITY = 1
     BIAS = 0.1
+    SCORE_WEIGHT_NN = 0.66
+    SCORE_WEIGHT_TEMPLATES = 0.7
+    SET_MATCH_THRESHOLD = 0.6
 
     def __init__(self,
                  datatxt_app_id,
                  datatxt_app_key,
                  lang='it'
                  ):
+
+        self.lang = lang
 
         #create network and modules
         self.net = FeedForwardNetwork()
@@ -211,10 +217,33 @@ class Nuts4Nuts(object):
 
         selected_places = [c for c in candidates if c.score >= max_score]
 
-        if len(selected_places) == 1:
-            selected_places[0].set_match()
-
         return selected_places
+
+    def _lau3_from_lau2(self, candidates):
+        lau2 = [c for c in candidates if c.type == '/LAU2']
+        lau3 = [c for c in candidates if c.type == '/LAU3']
+
+        logger.debug(lau2)
+        logger.debug(lau3)
+
+        winning_lau3s = list()
+
+        for cand in lau3:
+            lau3_fathers = [father for father in lau2 if father.name in cand.fathers]
+            if len(lau3_fathers) == 1:
+                winning_lau3s.append((cand, lau3_fathers[0]))
+
+        # logger.debug(winning_lau3s)
+        if len(winning_lau3s) == 1:
+            winning_lau3s[0][0].score = 1.0
+            return [winning_lau3s[0][0]]
+        elif len(winning_lau3s) > 1:
+            if len(frozenset(father for lau3, father in winning_lau3s)) == 1:
+                winning_lau3s[0][1].score = 1.0
+                return [winning_lau3s[0][1]]
+
+        return winning_lau3s
+
 
     def from_candidates(self, candidates):
         logger.debug('candidates: %s' % candidates)
@@ -227,54 +256,81 @@ class Nuts4Nuts(object):
 
         if len(candidates) == 0:
             logger.debug('No candidates found')
-            return []
+            return candidates
 
         if len(candidates) == 1:
-            candidates[0].set_match()
             candidates[0].score = 1.0
-            return [candidates[0]]
+            return candidates
 
-        lau2 = [c for c in candidates if c.type == '/LAU2']
-        lau3 = [c for c in candidates if c.type == '/LAU3']
-
-        # logger.debug(lau2)
-        # logger.debug(lau3)
-
-        winning_lau3s = list()
-
-        for cand in lau3:
-            lau3_fathers = [father for father in lau2 if father.name in cand.fathers]
-            if len(lau3_fathers) == 1:
-                winning_lau3s.append((cand, lau3_fathers[0]))
-
-        # logger.debug(winning_lau3s)
-        if len(winning_lau3s) == 1:
-            winning_lau3s[0][0].set_match()
-            winning_lau3s[0][0].score = 1.0
-            return [winning_lau3s[0][0]]
-        elif len(winning_lau3s) > 1:
-            if len(frozenset(father for lau3, father in winning_lau3s)) == 1:
-                winning_lau3s[0][1].set_match()
-                winning_lau3s[0][1].score = 1.0
-                return [winning_lau3s[0][1]]
+        winning_lau3s = self._lau3_from_lau2(candidates)
+        if winning_lau3s:
+            return winning_lau3s
 
         return self._select_couples(candidates)
 
     def find_municipality(self, page):
-        ag = AbstractGetter(page)
+        ta = TemplateAnalyzer(page=page, lang=self.lang)
+        candidates_from_templates = ta.analyze_templates()
+
+        logger.debug('candidates from templates: {candidates}'.format(
+                     candidates=candidates_from_templates))
+
+        ag = AbstractGetter(page=page, lang=self.lang)
         self.abstract = ag.get_abstract()
         querytext = self.dq.query(self.abstract)
-
-        # logger.debug(pprint(querytext))
 
         pg = PlacesGetter(page=page,
                           queryres=querytext)
 
-        self.candidates = pg.get_candidates()
 
-        logger.debug('candidates: {candidates}'.format(candidates=self.candidates))
+        candidates_for_nn = pg.get_candidates()
 
-        return self.from_candidates(candidates=self.candidates)
+        logger.debug('candidates: {candidates}'.format(candidates=candidates_for_nn))
+
+        common_candidates = set([c.name for c in candidates_from_templates]).intersection(
+                                 set([c.name for c in candidates_for_nn])
+                                 )
+        if common_candidates:
+            result = [c
+                      for c in candidates_from_templates
+                      for name in common_candidates
+                      if c.name == name
+                      ]
+
+            if len(result) == 1:
+                result[0].set_match()
+                result[0].score = 1.0
+
+            return result
+
+        else:
+            candidates_from_nn = self.from_candidates(candidates=candidates_for_nn)
+
+            for c in candidates_from_nn:
+                c.score = c.score*self.SCORE_WEIGHT_NN
+
+            for c in candidates_from_templates:
+                c.score = c.score*self.SCORE_WEIGHT_TEMPLATES
+
+            candidates_from_templates = self._lau3_from_lau2(candidates_from_templates) or \
+                                        candidates_from_templates
+
+            if candidates_from_templates and candidates_from_nn:
+                total_candidates = self._lau3_from_lau2(
+                    candidates_from_nn + candidates_from_templates)
+                return total_candidates
+            else:
+                if candidates_from_templates:
+                    if len(candidates_from_templates) == 1 and \
+                       candidates_from_templates[0].score > self.SET_MATCH_THRESHOLD:
+                       candidates_from_templates[0].set_match()
+                    return candidates_from_templates
+
+                else:
+                    if len(candidates_from_nn) == 1 and \
+                       candidates_from_nn[0].score > self.SET_MATCH_THRESHOLD:
+                       candidates_from_nn[0].set_match()
+                    return candidates_from_nn
 
     def show(self):
         for mod in self.net.modules:
@@ -320,11 +376,19 @@ if __name__ == "__main__":
 
     logger.addHandler(console)
 
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
+
+    try:
+        infile = open('../../datatxt-credentials.txt', 'r+')
+    except:
+        logger.error("Can not find DataTXT credentials. Goodbye!")
+        exit(0)
+
+    credentials = [line.strip() for line in infile.readlines()]
 
     # --- variables ---
-    DATATXT_APP_ID = 'ac0d0af0'
-    DATATXT_APP_KEY = '27bc8c33b4af532704cd621c9f39f261'
+    DATATXT_APP_ID = credentials[0]
+    DATATXT_APP_KEY = credentials[1]
 
     # --- main ---
     print
@@ -335,28 +399,55 @@ if __name__ == "__main__":
 
     n4n.load()
 
-    print "Find the municipality for: 'Chiesa di San Terenzio'"
-    print n4n.find_municipality('Chiesa_di_San_Terenzio')
+    # print "Find the municipality for: 'Chiesa di San Terenzio'"
+    # print n4n.find_municipality('Chiesa_di_San_Terenzio')
+    # print '----------'
+    # print
+    # print
+    # print "Find the municipality for: 'Grattacielo Pirelli'"
+    # print n4n.find_municipality('Grattacielo_Pirelli')
+    # print '----------'
+    # print
+    # print
+    # print "Find the municipality for: 'Parco Sempione (Milano)'"
+    # print n4n.find_municipality("Parco Sempione (Milano)")
+    # print '----------'
+    # print
+    # print
+    # print "Find the municipality for: 'asfjviolvj' (non-existing page)"
+    # print n4n.find_municipality("asfjviolvj")
+    # print '----------'
+    # print
+    # print
+    # print "Find the municipality for: 'Santuario_di_Pietralba'"
+    # print n4n.find_municipality("Santuario_di_Pietralba")
+    # print '----------'
+    # print
+    # print
+    # print "Find the municipality for: 'Monte Calisio'"
+    # print n4n.find_municipality("Monte Calisio")
+    # print '----------'
+    # print
+    # print
+    # print "Find the municipality for: 'Abbazia_di_Santa_Croce_al_Chienti'"
+    # print n4n.find_municipality("Abbazia_di_Santa_Croce_al_Chienti")
+    # print '----------'
+    # print
+    # print
+    # print "Find the municipality for: 'Palazzo Vecchio'"
+    # print n4n.find_municipality("Palazzo Vecchio")
+    # print '----------'
+    # print
     print
-    print "Find the municipality for: 'Grattacielo Pirelli'"
-    print n4n.find_municipality('Grattacielo_Pirelli')
+    print "Find the municipality for: 'Montonate'"
+    print n4n.find_municipality("Montonate")
+    print '----------'
     print
-    print "Find the municipality for: 'Parco Sempione (Milano)'"
-    print n4n.find_municipality("Parco Sempione (Milano)")
     print
-    print "Find the municipality for: 'asfjviolvj' (non-existing page)"
-    print n4n.find_municipality("asfjviolvj")
+    print "Find the municipality for: 'Museo del Risorgimento (Castelfidardo)'"
+    print n4n.find_municipality("Museo del Risorgimento (Castelfidardo)")
+    print '----------'
     print
-    print "Find the municipality for: 'Santuario_di_Pietralba'"
-    print n4n.find_municipality("Santuario_di_Pietralba")
-    print
-    print "Find the municipality for: 'Monte Calisio'"
-    print n4n.find_municipality("Monte Calisio")
-    print
-    print "Find the municipality for: 'Abbazia_di_Santa_Croce_al_Chienti'"
-    print n4n.find_municipality("Abbazia_di_Santa_Croce_al_Chienti")
-    print
-    print "Find the municipality for: 'Palazzo Vecchio'"
-    print n4n.find_municipality("Palazzo Vecchio")
+
 
     exit(0)

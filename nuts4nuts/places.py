@@ -10,9 +10,9 @@ logger = logging.getLogger('nuts4nuts.places')
 ALLOWEDTYPES = set([u'/LAU2', u'/LAU3'])
 
 
-class Place(object):
+class PlaceCandidate(object):
 
-    def __init__(self, name, id=None, type=None, fathers=None):
+    def __init__(self, name, id=None, type=None, fathers=[]):
         self.name = name
         self.id = id
         self.type = type
@@ -42,21 +42,21 @@ class Place(object):
         return getattr(self, key)
 
     def __repr__(self):
-        return 'Place<(name={name}, score={score}, match={match}, type={type}>'.format(
+        return 'PlaceCandidate<(name={name}, score={score}, match={match}, type={type}>'.format(
                name=repr(self.name),
                score=repr(self.score),
                match=repr(self.match),
                type=repr(self.type))
 
 
-class PlaceCandidate(object):
+class PlaceCandidateWithFeatures(PlaceCandidate):
 
     def __init__(self, name, id, type, fathers, features):
-        super(PlaceCandidate, self).__init__(name, id, type, fathers)
+        super(PlaceCandidateWithFeatures, self).__init__(name, id, type, fathers)
         self.features = features
 
     def __repr__(self):
-        return 'PlaceCandidate<(name={name}, score={score}, match={match}, type={type}, features={features})>'.format(
+        return 'PlaceCandidateWithFeatures<(name={name}, score={score}, match={match}, type={type}, features={features})>'.format(
                name=repr(self.name),
                score=repr(self.score),
                match=repr(self.match),
