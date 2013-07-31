@@ -229,7 +229,10 @@ class Nuts4Nuts(object):
         winning_lau3s = list()
 
         for cand in lau3:
-            lau3_fathers = [father for father in lau2 if father.name in cand.fathers]
+            lau3_fathers = [father
+                            for father in lau2
+                            if father.name.lower() in [cf.lower() for cf in cand.fathers]
+                            ]
             if len(lau3_fathers) == 1:
                 winning_lau3s.append((cand, lau3_fathers[0]))
 
@@ -383,7 +386,7 @@ if __name__ == "__main__":
 
     logger.addHandler(console)
 
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG)
 
     try:
         infile = open('../../datatxt-credentials.txt', 'r+')
@@ -465,5 +468,9 @@ if __name__ == "__main__":
     print n4n.find_municipality("Bianco_(Italia)")
     print '----------'
     print
+    print
+    print "Find the municipality for: 'Abbazia di Santa Croce al Chienti'"
+    print n4n.find_municipality("Abbazia di Santa Croce al Chienti")
+    print '----------'
 
     exit(0)

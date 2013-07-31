@@ -42,11 +42,12 @@ class PlaceCandidate(object):
         return getattr(self, key)
 
     def __repr__(self):
-        return 'PlaceCandidate<(name={name}, score={score}, match={match}, type={type}>'.format(
+        return 'PlaceCandidate<(name={name}, score={score}, match={match}, type={type}, fathers={fathers})>'.format(
                name=repr(self.name),
                score=repr(self.score),
                match=repr(self.match),
-               type=repr(self.type))
+               type=repr(self.type),
+               fathers=repr(self.fathers))
 
 
 class PlaceCandidateWithFeatures(PlaceCandidate):
@@ -56,12 +57,13 @@ class PlaceCandidateWithFeatures(PlaceCandidate):
         self.features = features
 
     def __repr__(self):
-        return 'PlaceCandidateWithFeatures<(name={name}, score={score}, match={match}, type={type}, features={features})>'.format(
+        return 'PlaceCandidateWithFeatures<(name={name}, score={score}, match={match}, type={type}, features={features}, fathers={fathers})>'.format(
                name=repr(self.name),
                score=repr(self.score),
                match=repr(self.match),
                type=repr(self.type),
-               features=repr(self.features))
+               features=repr(self.features),
+               fathers=repr(self.fathers))
 
 
 if __name__ == "__main__":
